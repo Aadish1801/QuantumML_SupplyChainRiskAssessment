@@ -20,11 +20,11 @@ def train_and_evaluate_models():
     """
     # 1. Load the processed data
     try:
-        X = pd.read_csv('processed_features.csv')
-        y = pd.read_csv('processed_target.csv').iloc[:, 0] # Read the first column as a Series
+        X = pd.read_csv('data/processed_features.csv')
+        y = pd.read_csv('data/processed_target.csv').iloc[:, 0] # Read the first column as a Series
     except FileNotFoundError as e:
         print(f"Error: {e}")
-        print("Please ensure 'processed_features.csv' and 'processed_target.csv' are in the same directory.")
+        print("Please ensure 'data/processed_features.csv' and 'data/processed_target.csv' are in the same directory.")
         return
 
     # 2. Split data into training and testing sets
@@ -45,7 +45,7 @@ def train_and_evaluate_models():
         "Support Vector Machine": SVC(),
         "Random Forest": RandomForestClassifier(random_state=42),
         "Gradient Boosting": GradientBoostingClassifier(random_state=42),
-        "XGBoost": XGBClassifier(random_state=42, use_label_encoder=False, eval_metric='mlogloss')
+        "XGBoost": XGBClassifier(random_state=42, eval_metric='mlogloss')
     }
 
     # 4. Train and evaluate each model
@@ -60,7 +60,7 @@ def train_and_evaluate_models():
         
         # Evaluate performance
         f1 = f1_score(y_test, y_pred, average='weighted')
-        report = classification_report(y_test, y_pred, target_names=['High Risk', 'Low Risk', 'Moderate Risk'])
+        report = classification_report(y_test, y_pred, target_names=['High Risk', 'Low Risk', 'Moderate Risk'], zero_division=0)
         cm = confusion_matrix(y_test, y_pred)
         
         print(f"Weighted F1 Score: {f1:.4f}")
@@ -78,7 +78,7 @@ def train_and_evaluate_models():
         plt.ylabel('Actual')
         plt.xlabel('Predicted')
         # Saving the plot to a file
-        plt.savefig(f'{name.replace(" ", "_")}_confusion_matrix.png')
+        plt.savefig(f'results/metrics/{name.replace(" ", "_")}_confusion_matrix.png')
         print(f"Saved confusion matrix plot to {name.replace(' ', '_')}_confusion_matrix.png\n")
 
 
