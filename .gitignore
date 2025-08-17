@@ -1,0 +1,35 @@
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- VS Code ---
+.vscode/
+*.code-workspace
+
+# --- Environments ---
+.env
+.venv
+env/
+venv/
+myenv/
+.qwen-code/
+qwen-code/
+
+# --- OS Files ---
+.DS_Store
+Thumbs.db
+
+# --- Logs / Results ---
+*.log
+*.out
+*.tmp
+
+notebooks\PBL-III_Synopsis.docx
