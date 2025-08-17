@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 
-def preprocess_supply_chain_data(input_path='dynamic_supply_chain_logistics_dataset.csv', features_output_path='processed_features.csv', target_output_path='processed_target.csv'):
+def preprocess_supply_chain_data(input_path='data/dynamic_supply_chain_logistics_dataset.csv', features_output_path='data/processed_features.csv', target_output_path='data/processed_target.csv'):
     """
     Loads, preprocesses, and saves the supply chain dataset.
     """
