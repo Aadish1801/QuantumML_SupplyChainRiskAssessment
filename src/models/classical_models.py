@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, f1_score, confusion_matrix
+from imblearn.over_sampling import SMOTE
 
 # Import models
 from sklearn.linear_model import LogisticRegression
@@ -28,32 +29,36 @@ def train_and_evaluate_models():
         return
 
     # 2. Split data into training and testing sets
-    # Using stratified split to maintain class distribution due to imbalance.
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
     )
 
+    # Apply SMOTE to the training data
+    smote = SMOTE(random_state=42)
+    X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
+
     print(f"Data split into training and testing sets.")
-    print(f"Training set shape: {X_train.shape}")
+    print(f"Original training set shape: {X_train.shape}")
+    print(f"Resampled training set shape: {X_train_resampled.shape}")
     print(f"Testing set shape: {X_test.shape}\n")
 
     # 3. Define models to train
-    # Note: You may need to install xgboost: pip install xgboost
     models = {
         "Logistic Regression": LogisticRegression(max_iter=1000),
         "K-Nearest Neighbors": KNeighborsClassifier(),
         "Support Vector Machine": SVC(),
         "Random Forest": RandomForestClassifier(random_state=42),
         "Gradient Boosting": GradientBoostingClassifier(random_state=42),
-        "XGBoost": XGBClassifier(random_state=42, eval_metric='mlogloss')
+        "XGBoost": XGBClassifier(random_state=42, eval_metric='mlogloss', use_label_encoder=False)
     }
+
 
     # 4. Train and evaluate each model
     for name, model in models.items():
         print(f"--- Evaluating: {name} ---")
         
         # Train the model
-        model.fit(X_train, y_train)
+        model.fit(X_train_resampled, y_train_resampled)
         
         # Make predictions
         y_pred = model.predict(X_test)
@@ -79,7 +84,7 @@ def train_and_evaluate_models():
         plt.xlabel('Predicted')
         # Saving the plot to a file
         plt.savefig(f'results/metrics/{name.replace(" ", "_")}_confusion_matrix.png')
-        print(f"Saved confusion matrix plot to {name.replace(' ', '_')}_confusion_matrix.png\n")
+        print(f"Saved confusion matrix plot to KNN_confusion_matrix.png\n")
 
 
 if __name__ == '__main__':
