@@ -1,4 +1,3 @@
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,6 +5,8 @@ import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, f1_score, confusion_matrix
 from imblearn.over_sampling import SMOTE
+import joblib
+import os
 
 # Import models
 from sklearn.linear_model import LogisticRegression
@@ -17,15 +18,15 @@ from xgboost import XGBClassifier
 def train_and_evaluate_models():
     """
     Loads the processed data, splits it, trains multiple classical models,
-    and evaluates their performance.
+    saves key models, and evaluates their performance.
     """
     # 1. Load the processed data
     try:
         X = pd.read_csv('data/processed_features.csv')
-        y = pd.read_csv('data/processed_target.csv').iloc[:, 0] # Read the first column as a Series
+        y = pd.read_csv('data/processed_target.csv').iloc[:, 0]
     except FileNotFoundError as e:
         print(f"Error: {e}")
-        print("Please ensure 'data/processed_features.csv' and 'data/processed_target.csv' are in the same directory.")
+        print("Please ensure 'data/processed_features.csv' and 'data/processed_target.csv' exist.")
         return
 
     # 2. Split data into training and testing sets
@@ -49,16 +50,24 @@ def train_and_evaluate_models():
         "Support Vector Machine": SVC(),
         "Random Forest": RandomForestClassifier(random_state=42),
         "Gradient Boosting": GradientBoostingClassifier(random_state=42),
-        "XGBoost": XGBClassifier(random_state=42, eval_metric='mlogloss', use_label_encoder=False)
+        "XGBoost": XGBClassifier(random_state=42, eval_metric='mlogloss')
     }
 
-
-    # 4. Train and evaluate each model
+    # 4. Train, evaluate, and save each model
     for name, model in models.items():
         print(f"--- Evaluating: {name} ---")
         
         # Train the model
         model.fit(X_train_resampled, y_train_resampled)
+
+        # Save the model if it's one of the specified ones
+        if name in ["Random Forest", "XGBoost"]:
+            model_dir = 'results/models'
+            if not os.path.exists(model_dir):
+                os.makedirs(model_dir)
+            model_path = os.path.join(model_dir, f'{name.replace(" ", "_")}_model.joblib')
+            joblib.dump(model, model_path)
+            print(f"Saved trained {name} model to {model_path}")
         
         # Make predictions
         y_pred = model.predict(X_test)
@@ -82,10 +91,14 @@ def train_and_evaluate_models():
         plt.title(f'Confusion Matrix for {name}')
         plt.ylabel('Actual')
         plt.xlabel('Predicted')
+        
         # Saving the plot to a file
-        plt.savefig(f'results/metrics/{name.replace(" ", "_")}_confusion_matrix.png')
-        print(f"Saved confusion matrix plot to KNN_confusion_matrix.png\n")
-
+        plots_dir = 'results/metrics'
+        if not os.path.exists(plots_dir):
+            os.makedirs(plots_dir)
+        plot_path = os.path.join(plots_dir, f'{name.replace(" ", "_")}_confusion_matrix.png')
+        plt.savefig(plot_path)
+        print(f"Saved confusion matrix plot to {plot_path}\n")
 
 if __name__ == '__main__':
     train_and_evaluate_models()
