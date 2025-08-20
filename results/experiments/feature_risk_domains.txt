@@ -1,0 +1,35 @@
+Feature Categorization by Risk Domain
+
+--- Supplier-Related Risk ---
+- supplier_reliability_score
+- lead_time_days
+
+--- Demand-Related Risk ---
+- historical_demand
+- order_fulfillment_status
+- demand_x_reliability
+
+--- Operational Risk ---
+- fuel_consumption_rate
+- eta_variation_hours
+- warehouse_inventory_level
+- loading_unloading_time
+- handling_equipment_availability
+- iot_temperature
+- cargo_condition_status
+- driver_behavior_score
+- fatigue_monitoring_score
+- shipping_costs
+- cost_per_lead_day
+- location_cluster
+
+--- External Risk ---
+- traffic_congestion_level
+- weather_condition_severity
+- port_congestion_level
+- route_risk_level
+- customs_clearance_time
+- congestion_ratio
+- hour
+- day_of_week
+- month
