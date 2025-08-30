@@ -88,14 +88,16 @@ def train_qnn_models():
                             num_qubits=num_features,
                             ansatz_reps=ansatz_reps
                         )
-                        qnn = qnn_models.create_qnn()
+                        # Get number of classes from the dataset
+                        num_classes = len(np.unique(y_train_np))
+                        qnn = qnn_models.create_qnn(num_classes=num_classes)
                         
-                        # Create classifier with QNN
-                        # Note: The QNN output shape must match the number of classes in y.
-                        # If y has more than 2 classes, the QNN's output_shape in vqa_models.py likely needs adjustment.
+                        # Create classifier with QNN and proper loss function for classification
                         classifier = NeuralNetworkClassifier(
                             neural_network=qnn,
-                            optimizer=optimizer
+                            optimizer=optimizer,
+                            loss='cross_entropy',  # Use cross-entropy loss for classification
+                            one_hot=True  # Assuming labels need to be one-hot encoded
                         )
                         
                         classifier.fit(X_train_np, y_train_np)

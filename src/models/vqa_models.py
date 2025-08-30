@@ -23,7 +23,7 @@ class VariationalQuantumRiskModels:
         else: # Default to SPSA
             self.optimizer = SPSA(maxiter=maxiter)
 
-    def create_qnn(self):
+    def create_qnn(self, num_classes=3):
         # Combine the feature map and ansatz into a single circuit
         qc = QuantumCircuit(self.q_models.num_qubits)
         qc.compose(self.feature_map, inplace=True)
@@ -31,17 +31,21 @@ class VariationalQuantumRiskModels:
         # Add measurements to all qubits for SamplerQNN
         qc.measure_all() 
 
-        # Use SamplerQNN for classification tasks, it's generally more suitable
-        # The output shape for SamplerQNN is handled differently, often based on the number of qubits measured
-        # and the interpret function if needed. For standard classification with NeuralNetworkClassifier,
-        # it often works automatically based on the y_train labels.
+        # Define an interpret function to map bitstrings to classes
+        # This simple approach uses modulo to distribute outcomes among classes
+        def interpret_class(x):
+            # x is the integer representation of the bitstring
+            # Map to classes 0, 1, 2 using modulo
+            return x % num_classes
+
+        # Use SamplerQNN with proper interpret function and output shape
         qnn = SamplerQNN(
             circuit=qc, 
             input_params=self.feature_map.parameters, 
             weight_params=self.ansatz.parameters,
-            sampler=self.sampler
-            # output_shape is typically not needed here for standard use with NeuralNetworkClassifier
-            # The classifier infers the number of classes from y_train
+            sampler=self.sampler,
+            interpret=interpret_class,
+            output_shape=(num_classes,)  # Set output shape to match number of classes
         )
         return qnn
 
