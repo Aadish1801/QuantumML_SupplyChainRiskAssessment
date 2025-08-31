@@ -100,19 +100,11 @@ def train_qsvc_models():
                     # - Avoid pickling full Qiskit objects (feature_map, quantum_kernel)
                     # - Store QASM strings or reconstructible info instead for portability
                     # - Include 'error': None for successful runs for consistent DataFrame structure
-                    # Note: In newer Qiskit versions, use .qasm_str() or convert to circuit first
-                    try:
-                        feature_map_qasm = feature_map.qasm_str()
-                    except AttributeError:
-                        # Fallback if qasm_str is not available
-                        from qiskit import QuantumCircuit
-                        # Ensure it's a full circuit object that can be converted
-                        if hasattr(feature_map, 'decompose'):
-                            temp_circuit = feature_map.decompose()
-                        else:
-                            temp_circuit = QuantumCircuit(feature_map.num_qubits)
-                            temp_circuit.compose(feature_map, inplace=True)
-                        feature_map_qasm = temp_circuit.qasm()
+                    # Note: In newer Qiskit versions, use qasm3.dumps() instead of deprecated .qasm() method
+                    import qiskit.qasm3 as qasm3
+                    
+                    # Convert feature map to QASM3 format
+                    feature_map_qasm = qasm3.dumps(feature_map.decompose())
                     
                     model_info = {
                         'model_type': 'QSVC',

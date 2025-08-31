@@ -109,31 +109,12 @@ def run_hyperparameter_sweep():
                         # - Store QASM strings instead for portability
                         # - Optimizer name and maxiter are already stored
                         # - Include 'error': None for successful runs for consistent DataFrame structure
-                        # Note: In newer Qiskit versions, use .qasm_str() or convert to circuit first
-                        try:
-                            feature_map_qasm = vqa_models.feature_map.qasm_str()
-                        except AttributeError:
-                            # Fallback if qasm_str is not available
-                            from qiskit import QuantumCircuit
-                            # Ensure it's a full circuit object that can be converted
-                            if hasattr(vqa_models.feature_map, 'decompose'):
-                                temp_circuit = vqa_models.feature_map.decompose()
-                            else:
-                                temp_circuit = QuantumCircuit(vqa_models.feature_map.num_qubits)
-                                temp_circuit.compose(vqa_models.feature_map, inplace=True)
-                            feature_map_qasm = temp_circuit.qasm()
+                        # Note: In newer Qiskit versions, use qasm3.dumps() instead of deprecated .qasm() method
+                        import qiskit.qasm3 as qasm3
                         
-                        try:
-                            ansatz_qasm = vqa_models.ansatz.qasm_str()
-                        except AttributeError:
-                            # Fallback if qasm_str is not available
-                            from qiskit import QuantumCircuit
-                            if hasattr(vqa_models.ansatz, 'decompose'):
-                                temp_circuit = vqa_models.ansatz.decompose()
-                            else:
-                                temp_circuit = QuantumCircuit(vqa_models.ansatz.num_qubits)
-                                temp_circuit.compose(vqa_models.ansatz, inplace=True)
-                            ansatz_qasm = temp_circuit.qasm()
+                        # Convert feature map and ansatz to QASM3 format
+                        feature_map_qasm = qasm3.dumps(vqa_models.feature_map.decompose())
+                        ansatz_qasm = qasm3.dumps(vqa_models.ansatz.decompose())
                         
                         model_info = {
                             'model_type': 'VQC',
