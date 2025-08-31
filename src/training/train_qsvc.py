@@ -62,7 +62,9 @@ def train_qsvc_models():
         # --- QSVC Hyperparameter Sweep ---
         for feature_map_depth in param_space['feature_map_depth']:
             for entanglement in param_space['feature_map_entanglement']:
-                print(f"\n--- Testing QSVC with config: depth={feature_map_depth}, entanglement={entanglement} ---")
+                # Define config_str early for use in both try and except blocks
+                config_str = f"depth={feature_map_depth}, entanglement={entanglement}"
+                print(f"\n--- Testing QSVC with config: {config_str} ---")
                 
                 # Measure training time
                 start_time = time.time()
@@ -91,7 +93,6 @@ def train_qsvc_models():
                     # Evaluate
                     qsvc_score = qsvc.score(X_test_np, y_test_np)
                     
-                    config_str = f"depth={feature_map_depth}, entanglement={entanglement}"
                     print(f"[RESULT] QSVC Accuracy ({exp_type}, {config_str}): {qsvc_score:.4f}")
                     print(f"[TIMING] Training time: {training_time:.4f} seconds")
                     
