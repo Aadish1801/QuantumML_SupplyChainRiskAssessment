@@ -76,8 +76,10 @@ def train_qsvc_models():
                         entanglement=entanglement
                     )
                     
-                    # Create quantum kernel
-                    fidelity = ComputeUncompute(sampler=None)  # Using default sampler
+                    # Create quantum kernel with proper sampler
+                    from qiskit.primitives import Sampler
+                    sampler = Sampler()
+                    fidelity = ComputeUncompute(sampler=sampler)
                     quantum_kernel = FidelityQuantumKernel(
                         feature_map=feature_map,
                         fidelity=fidelity
