@@ -5,15 +5,24 @@ from qiskit_machine_learning.neural_networks import EstimatorQNN, SamplerQNN # I
 from qiskit_machine_learning.kernels import FidelityQuantumKernel
 from qiskit_algorithms.state_fidelities import ComputeUncompute
 from src.models.quantum_circuits import QuantumSupplyChainModels
-from qiskit.primitives import Sampler, Estimator
+from qiskit.primitives import BackendSampler
+from qiskit_aer import AerSimulator
 
 class VariationalQuantumRiskModels:
-    def __init__(self, num_qubits=6, ansatz_reps=3, optimizer_name='SPSA', maxiter=100):
-        self.q_models = QuantumSupplyChainModels(num_qubits=num_qubits, ansatz_reps=ansatz_reps)
+    def __init__(self, num_qubits=6, ansatz_reps=3, feature_map_reps=2, feature_map_entanglement='linear', optimizer_name='SPSA', maxiter=100):
+        self.q_models = QuantumSupplyChainModels(
+            num_qubits=num_qubits, 
+            ansatz_reps=ansatz_reps,
+            feature_map_reps=feature_map_reps,
+            feature_map_entanglement=feature_map_entanglement
+        )
         self.feature_map = self.q_models.create_feature_map()
         self.ansatz = self.q_models.create_ansatz()
-        self.sampler = Sampler() # This is fine for SamplerQNN
-        self.estimator = Estimator() # This is fine for EstimatorQNN
+        
+        # Use explicit AerSimulator for better control and performance
+        backend = AerSimulator(method='statevector', shots=1024)
+        self.sampler = BackendSampler(backend=backend, options={"shots": 1024})
+        self.sampler.set_options(seed=42)  # For reproducibility
         
         # Select the optimizer based on the input name
         if optimizer_name.upper() == 'ADAM':
@@ -58,11 +67,11 @@ class VariationalQuantumRiskModels:
         return vqc
 
 
-    def create_qsvc(self):
+    def create_qsvc(self, C=1.0):
         fidelity = ComputeUncompute(sampler=self.sampler)
         quantum_kernel = FidelityQuantumKernel(
             feature_map=self.feature_map,
             fidelity=fidelity
         )
-        qsvc = QSVC(quantum_kernel=quantum_kernel)
+        qsvc = QSVC(quantum_kernel=quantum_kernel, C=C)
         return qsvc
